@@ -115,6 +115,24 @@ class App extends React.Component {
   }
 }
 
+const Tabs = (props) => {
+  const tabs = props.tabs.map((t, index) => (
+    <div
+      className={t.active? 'active item' : 'item'}
+      key={index}
+      onClick={() => props.onClick(t.id)}
+    >
+      {t.title}
+    </div>
+  ));
+
+  return (
+    <div className='ui top attached tabular menu'>
+      {tabs}
+    </div>
+  );
+}
+
 class ThreadTabs extends React.Component {
   handleClick = (id) => {
     store.dispatch({
@@ -123,20 +141,11 @@ class ThreadTabs extends React.Component {
     });
   }
   render() {
-    const tabs = this.props.tabs.map((t, index) => (
-      <div
-        className={t.active? 'active item' : 'item'}
-        key={index}
-        onClick={() => this.handleClick(t.id)}
-      >
-        {t.title}
-      </div>
-    ));
-
     return (
-      <div className='ui top attached tabular menu'>
-        {tabs}
-      </div>
+      <Tabs
+        tabs={this.props.tabs}
+        onClick={this.handleClick}
+      />
     );
   }
 }
