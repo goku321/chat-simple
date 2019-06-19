@@ -134,6 +134,10 @@ const Tabs = (props) => {
 }
 
 class ThreadTabs extends React.Component {
+  componentDidMount = () => {
+    store.subscribe(() => this.forceUpdate());
+  }
+
   handleClick = (id) => {
     store.dispatch({
       type: 'OPEN_THREAD',
@@ -141,9 +145,18 @@ class ThreadTabs extends React.Component {
     });
   }
   render() {
+    const state = store.getState();
+
+    const tabs = state.threads.map(t => (
+      {
+        title: t.title,
+        active: t.id === state.activeThreadId,
+        id: t.id,
+      }
+    ));
     return (
       <Tabs
-        tabs={this.props.tabs}
+        tabs={tabs}
         onClick={this.handleClick}
       />
     );
