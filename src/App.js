@@ -144,54 +144,6 @@ const ThreadTabs = connect(
   mapDispatchToTabsProps
 )(Tabs);
 
-class ThreadDisplay extends React.Component {
-  componentDidMount = () => {
-    store.subscribe(() => this.forceUpdate());
-  }
-
-  handleMessageClick = (id) => {
-    store.dispatch({
-      type: 'DELETE_MESSAGE',
-      id: id,
-    });
-  }
-
-  handleMessageSubmit = (text, activeThreadId) => {
-    store.dispatch({
-      type: 'ADD_MESSAGE',
-      text: text,
-      threadId: activeThreadId,
-    });
-  }
-  render() {
-    const state = store.getState();
-    const activeThreadId = state.activeThreadId;
-    const activeThread = state.threads.find(
-      (t) => t.id === activeThreadId
-    );
-
-    return (
-      <Thread
-        thread={activeThread}
-        onMessageClick={this.handleMessageClick}
-        onMessageSubmit={(text) => this.handleMessageSubmit(text, activeThreadId)}
-      />
-    );
-  }
-}
-
-const Thread = (props) => (
-  <div className='ui center aligned basic segment'>
-    <MessageList
-      messages={props.thread.messages}
-      onClick={props.onMessageClick}
-    />
-    <TextFieldSubmit
-      onSubmit={props.onMessageSubmit}
-    />
-  </div>
-);
-
 class TextFieldSubmit extends React.Component {
   state = {
     value: '',
@@ -248,6 +200,61 @@ const MessageList = (props) => (
     }
   </div>
 );
+
+const Thread = (props) => (
+  <div className='ui center aligned basic segment'>
+    <MessageList
+      messages={props.thread.messages}
+      onClick={props.onMessageClick}
+    />
+    <TextFieldSubmit
+      onSubmit={props.onMessageSubmit}
+    />
+  </div>
+);
+
+const mapStateToThreadProps = (state) => {
+  const activeThreadId = state.activeThreadId;
+  const activeThread = state.threads.find(
+    (t) => t.id === activeThreadId
+  );
+
+  return {
+    thread: activeThread,
+  };
+}
+
+const mapDispatchToThreadProps = (dispatch) => {
+  return {
+    onMessageClick: (id) => (
+      dispatch({
+        type: 'DELETE_MESSAGE',
+        id: id,
+      })
+    ),
+    dispatch: dispatch,
+  };
+}
+
+const mergeThreadProps = (stateProps, dispatchProps) => (
+  {
+    ...stateProps,
+    ...dispatchProps,
+    onMessageSubmit: (text) => (
+      dispatchProps.dispatch({
+        type: 'ADD_MESSAGE',
+        text: text,
+        threadId: stateProps.thread.id,
+      })
+    ),
+  }
+);
+
+const ThreadDisplay = connect(
+  mapStateToThreadProps,
+  mapDispatchToThreadProps,
+  mergeThreadProps
+)(Thread);
 
 const WrappedApp = () => (
   <Provider store={store}>
